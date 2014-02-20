@@ -1,0 +1,35 @@
+{
+    "versionLabel": "2.0",
+    "uuid": "00b3c1f8-31e6-4e9a-8e16-fab218cf1983",
+    "appKeys": {},
+    "longName": "Bar Graph",
+    "versionCode": 2,
+    "capabilities": [
+        ""
+    ],
+    "shortName": "Bar Graph",
+    "companyName": "distantcam",
+    "watchapp": {
+        "watchface": true
+    },
+    "resources": {
+        "media": [
+            {
+                "type": "font",
+                "name": "FONT_ARIAL_22",
+                "file": "fonts/arial.ttf"
+            },
+            {
+                "type": "png",
+                "name": "IMAGE_FACE",
+                "file": "images/face.png"
+            },
+            {
+                "menuIcon": true,
+                "type": "png",
+                "name": "IMAGE_MENU_ICON",
+                "file": "images/menu_icon.png"
+            }
+        ]
+    }
+}
