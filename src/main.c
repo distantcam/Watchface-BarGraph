@@ -61,20 +61,16 @@ void update_date()
 	text_layer_set_text(dateLayer, dateText);
 }
 
-void handle_hour_tick(struct tm *tick_time, TimeUnits units_changed) {
-	layer_mark_dirty(hourLayer);
-}
-
-void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
-	layer_mark_dirty(minLayer);
-}
-
-void handle_day_tick(struct tm *tick_time, TimeUnits units_changed) {
-	update_date();
+void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
+	if ((units_changed & HOUR_UNIT) != 0)
+		layer_mark_dirty(hourLayer);
+	if ((units_changed & MINUTE_UNIT) != 0)
+		layer_mark_dirty(minLayer);
+	if ((units_changed & DAY_UNIT) != 0)
+		update_date();
 }
 
 void init(void) {
-	
 	// Set up window
 	window = window_create();
 	window_set_background_color(window, GColorBlack);
@@ -108,9 +104,9 @@ void init(void) {
   	text_layer_set_font(dateLayer, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_ARIAL_22)));
   	layer_add_child(windowLayer, text_layer_get_layer(dateLayer));
 	
-	tick_timer_service_subscribe(HOUR_UNIT, handle_hour_tick);
-	tick_timer_service_subscribe(MINUTE_UNIT, handle_minute_tick);
-	tick_timer_service_subscribe(DAY_UNIT, handle_day_tick);
+	update_date();
+	
+	tick_timer_service_subscribe(MINUTE_UNIT, handle_tick);
 }
 
 void deinit(void) {
