@@ -50,8 +50,7 @@ void update_minute(Layer *me, GContext* ctx) {
     }
 }
 
-void update_date()
-{
+void update_date() {
 	time_t now = time(NULL);
   	struct tm *t = localtime(&now);
 	
@@ -110,6 +109,8 @@ void init(void) {
 }
 
 void deinit(void) {
+	tick_timer_service_unsubscribe();
+	
 	layer_remove_from_parent(bitmap_layer_get_layer(faceLayer));
   	bitmap_layer_destroy(faceLayer);
   	gbitmap_destroy(faceImage);
