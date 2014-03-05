@@ -1,4 +1,5 @@
 #include <pebble.h>
+#include "autoconfig.h"
 
 Window *window;
 
@@ -69,7 +70,20 @@ void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
 		update_date();
 }
 
+void in_received_handler(DictionaryIterator *iter, void *context) {
+	autoconfig_in_received_handler(iter, context);
+
+	time_t now = time(NULL);
+  	struct tm *t = localtime(&now);
+
+  	handle_tick(t, MINUTE_UNIT);
+}
+
 void init(void) {
+	autoconfig_init();
+
+	app_message_register_inbox_received(in_received_handler);
+
 	// Set up window
 	window = window_create();
 	window_set_background_color(window, GColorBlack);
@@ -121,6 +135,8 @@ void deinit(void) {
 	text_layer_destroy(dateLayer);
 	
 	window_destroy(window);
+
+	autoconfig_deinit();
 }
 
 int main(void) {

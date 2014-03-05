@@ -1,11 +1,13 @@
 {
-    "versionLabel": "2.0.1",
+    "versionLabel": "2.1",
     "uuid": "00b3c1f8-31e6-4e9a-8e16-fab218cf1983",
-    "appKeys": {},
+    "appKeys": {
+        "invert": 0    
+    },
     "longName": "Bar Graph",
     "versionCode": 1,
     "capabilities": [
-        ""
+        "configurable"
     ],
     "shortName": "Bar Graph",
     "companyName": "Cameron MacFarland",
@@ -31,5 +33,16 @@
                 "file": "images/menu_icon.png"
             }
         ]
+    },
+    "preferences": {
+        "url" : "http://distantcam.github.io/Watchface-BarGraph/config/2.1/index.html",
+        "items": [{
+                "name": "invert",
+                "title": "Invert Display",
+                "type": "boolean",
+                "off-text": "Black",
+                "on-text": "White",
+                "default": false
+        }]
     }
 }
