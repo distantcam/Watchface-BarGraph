@@ -11,49 +11,51 @@ Layer *minLayer;
 
 TextLayer *dateLayer;
 
+InverterLayer *invertLayer;
+
 void update_hour(Layer *me, GContext* ctx) {
 	time_t now = time(NULL);
-  	struct tm *t = localtime(&now);
+	struct tm *t = localtime(&now);
 
-  	int height = t->tm_hour;
+	int height = t->tm_hour;
 
-  	if (height > 12)
-    	height -= 12;
+	if (height > 12)
+		height -= 12;
 
-  	if (height == 0)
-    	height = 12;
+	if (height == 0)
+		height = 12;
 
-  	graphics_context_set_fill_color(ctx, GColorWhite);
-  	graphics_context_set_stroke_color(ctx, GColorBlack);
+	graphics_context_set_fill_color(ctx, GColorWhite);
+	graphics_context_set_stroke_color(ctx, GColorBlack);
 
-  	graphics_fill_rect(ctx, GRect(38, 132 - height * 10, 30, height * 10), 0, GCornerNone);
+	graphics_fill_rect(ctx, GRect(38, 132 - height * 10, 30, height * 10), 0, GCornerNone);
 
-  	for (int i = 0; i < height-1; i++)
+	for (int i = 0; i < height-1; i++)
 	{
-    	graphics_draw_line(ctx, GPoint(38, 122 - i*10), GPoint(67, 122 - i*10));
+		graphics_draw_line(ctx, GPoint(38, 122 - i*10), GPoint(67, 122 - i*10));
 	}
 }
 
 void update_minute(Layer *me, GContext* ctx) {
 	time_t now = time(NULL);
-  	struct tm *t = localtime(&now);
+	struct tm *t = localtime(&now);
 
-    int height = t->tm_min * 2;
+	int height = t->tm_min * 2;
 
-    graphics_context_set_fill_color(ctx, GColorWhite);
-    graphics_context_set_stroke_color(ctx, GColorBlack);
+	graphics_context_set_fill_color(ctx, GColorWhite);
+	graphics_context_set_stroke_color(ctx, GColorBlack);
 
-    graphics_fill_rect(ctx, GRect(76, 132 - height, 30, height), 0, GCornerNone);
+	graphics_fill_rect(ctx, GRect(76, 132 - height, 30, height), 0, GCornerNone);
 
-    for (int i = 10; i < height; i+=10)
-    {
-      graphics_draw_line(ctx, GPoint(76, 132 - i), GPoint(105, 132 - i));
-    }
+	for (int i = 10; i < height; i+=10)
+	{
+	  graphics_draw_line(ctx, GPoint(76, 132 - i), GPoint(105, 132 - i));
+	}
 }
 
 void update_date() {
 	time_t now = time(NULL);
-  	struct tm *t = localtime(&now);
+	struct tm *t = localtime(&now);
 	
 	static char dateText[] = "xxx, xxx 00";
 	
@@ -73,10 +75,7 @@ void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
 void in_received_handler(DictionaryIterator *iter, void *context) {
 	autoconfig_in_received_handler(iter, context);
 
-	time_t now = time(NULL);
-  	struct tm *t = localtime(&now);
-
-  	handle_tick(t, MINUTE_UNIT);
+	layer_set_hidden(inverter_layer_get_layer(invertLayer), !getInvert());
 }
 
 void init(void) {
@@ -87,7 +86,7 @@ void init(void) {
 	// Set up window
 	window = window_create();
 	window_set_background_color(window, GColorBlack);
-  	window_stack_push(window, true); // Animated
+	window_stack_push(window, true); // Animated
 	
 	Layer *windowLayer = window_get_root_layer(window);
 	GRect windowFrame = layer_get_frame(windowLayer);
@@ -102,20 +101,24 @@ void init(void) {
 	// Set up hour
 	hourLayer = layer_create(windowFrame);
 	layer_set_update_proc(hourLayer, update_hour);
-  	layer_add_child(windowLayer, hourLayer);
+	layer_add_child(windowLayer, hourLayer);
 	
 	// Set up minute
 	minLayer = layer_create(windowFrame);
 	layer_set_update_proc(minLayer, update_minute);
-  	layer_add_child(windowLayer, minLayer);
+	layer_add_child(windowLayer, minLayer);
 	
 	// Set up date text
 	dateLayer = text_layer_create(GRect(0,138,144,30));
 	text_layer_set_text_color(dateLayer, GColorWhite);
-  	text_layer_set_background_color(dateLayer, GColorClear);
-  	text_layer_set_text_alignment(dateLayer, GTextAlignmentCenter);
-  	text_layer_set_font(dateLayer, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_ARIAL_22)));
-  	layer_add_child(windowLayer, text_layer_get_layer(dateLayer));
+	text_layer_set_background_color(dateLayer, GColorClear);
+	text_layer_set_text_alignment(dateLayer, GTextAlignmentCenter);
+	text_layer_set_font(dateLayer, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_ARIAL_22)));
+	layer_add_child(windowLayer, text_layer_get_layer(dateLayer));
+
+	invertLayer = inverter_layer_create(windowFrame);
+	layer_add_child(windowLayer, inverter_layer_get_layer(invertLayer));
+	layer_set_hidden(inverter_layer_get_layer(invertLayer), !getInvert());
 	
 	update_date();
 	
@@ -126,13 +129,15 @@ void deinit(void) {
 	tick_timer_service_unsubscribe();
 	
 	layer_remove_from_parent(bitmap_layer_get_layer(faceLayer));
-  	bitmap_layer_destroy(faceLayer);
-  	gbitmap_destroy(faceImage);
+	bitmap_layer_destroy(faceLayer);
+	gbitmap_destroy(faceImage);
 	
 	layer_destroy(hourLayer);
 	layer_destroy(minLayer);
 	
 	text_layer_destroy(dateLayer);
+
+	inverter_layer_destroy(invertLayer);
 	
 	window_destroy(window);
 
